@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}{{ subject.name }} - Exam Results{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Results Summary -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <div class="text-center">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ subject.name }}</h1>
+            <p class="text-gray-600 dark:text-gray-300 mb-6">{{ class_level }} - Exam Results</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                    <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ total_questions }}</div>
+                    <div class="text-sm text-blue-800 dark:text-blue-200">Total Questions</div>
+                </div>
+                <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                    <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ correct_answers }}</div>
+                    <div class="text-sm text-green-800 dark:text-green-200">Correct Answers</div>
+                </div>
+                <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+                    <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ "%.1f"|format(percentage) }}%</div>
+                    <div class="text-sm text-purple-800 dark:text-purple-200">Score</div>
+                </div>
+            </div>
+            
+            <!-- Performance Indicator -->
+            <div class="mb-6">
+                {% if percentage >= 75 %}
+                    <div class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        Excellent Performance!
+                    </div>
+                {% elif percentage >= 60 %}
+                    <div class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                        </svg>
+                        Good Performance
+                    </div>
+                {% else %}
+                    <div class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                        </svg>
+                        Needs Improvement
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="flex gap-4 justify-center">
+                <a href="{{ url_for('student.index') }}" 
+                   class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                    Back to Subjects
+                </a>
+                <a href="{{ url_for('student.external_questions') }}" 
+                   class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                    More API Questions
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Results -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Question Review</h2>
+        
+        <div class="space-y-6">
+            {% for result in results %}
+            <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 {% if result.is_correct %}bg-green-50 dark:bg-green-900/10{% else %}bg-red-50 dark:bg-red-900/10{% endif %}">
+                <div class="flex items-start justify-between mb-3">
+                    <h3 class="font-medium text-gray-900 dark:text-white">Question {{ loop.index }}</h3>
+                    <div class="flex items-center">
+                        {% if result.is_correct %}
+                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="ml-1 text-sm text-green-600 dark:text-green-400 font-medium">Correct</span>
+                        {% else %}
+                            <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="ml-1 text-sm text-red-600 dark:text-red-400 font-medium">Incorrect</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <p class="text-gray-700 dark:text-gray-300 mb-4">{{ result.question }}</p>
+                
+                <div class="space-y-2">
+                    {% for option in result.options %}
+                    <div class="flex items-center p-2 rounded {% if option.option == result.correct_answer %}bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800{% elif option.option == result.submitted_answer and not result.is_correct %}bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800{% else %}bg-gray-50 dark:bg-gray-700{% endif %}">
+                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ option.option }}</span>
+                        {% if option.option == result.correct_answer %}
+                            <svg class="w-4 h-4 text-green-600 dark:text-green-400 ml-auto" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                        {% elif option.option == result.submitted_answer and not result.is_correct %}
+                            <svg class="w-4 h-4 text-red-600 dark:text-red-400 ml-auto" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414-1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                            </svg>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if not result.is_correct %}
+                <div class="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                    <p class="text-sm text-yellow-800 dark:text-yellow-200">
+                        <strong>Your answer:</strong> {{ result.submitted_answer or 'No answer provided' }}<br>
+                        <strong>Correct answer:</strong> {{ result.correct_answer }}
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

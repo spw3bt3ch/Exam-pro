@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Report Card</title>
+	<style>
+		body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 12px; }
+		h1 { font-size: 18px; margin: 0 0 6px 0; }
+		table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+		th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
+		th { background: #f5f5f5; font-weight: bold; }
+		.small { color: #666; font-size: 11px; }
+		.overall { font-weight: bold; background: #f9f9f9; }
+		.no-data { text-align: center; color: #666; font-style: italic; }
+	</style>
+</head>
+<body>
+	<h1>Report Card - {{ user.full_name }}</h1>
+	<p class="small">Generated on {{ moment().format('YYYY-MM-DD HH:mm') if moment else 'N/A' }}</p>
+	<table>
+		<tr>
+			<th>Subject</th>
+			<th>Total</th>
+			<th>Correct</th>
+			<th>Score (%)</th>
+			<th>Grade</th>
+			<th>Date</th>
+		</tr>
+		{% if rows %}
+			{% for row in rows %}
+			<tr>
+				<td>{{ row.subject.name if row.subject else 'Unknown Subject' }}</td>
+				<td>{{ row.total or 0 }}</td>
+				<td>{{ row.correct or 0 }}</td>
+				<td>{{ '%.1f' % (row.percentage or 0) }}</td>
+				<td>{{ row.grade or 'N/A' }}</td>
+				<td>
+					{% if row.session and row.session.completed_at %}
+						{{ row.session.completed_at.strftime('%Y-%m-%d %H:%M') }}
+					{% else %}
+						-
+					{% endif %}
+				</td>
+			</tr>
+			{% endfor %}
+			<tr class="overall">
+				<td><strong>Overall Average</strong></td>
+				<td colspan="2"></td>
+				<td><strong>{{ '%.1f' % (overall or 0) }}%</strong></td>
+				<td><strong>{{ overall_grade or 'N/A' }}</strong></td>
+				<td></td>
+			</tr>
+		{% else %}
+			<tr>
+				<td colspan="6" class="no-data">No completed exams found.</td>
+			</tr>
+		{% endif %}
+	</table>
+	<p class="small" style="margin-top: 15px;">This report shows the latest exam results for each subject.</p>
+</body>
+</html>

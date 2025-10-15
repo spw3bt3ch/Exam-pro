@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block title %}Debug Report Card{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <h1 class="text-2xl font-bold mb-6">Debug Report Card Issue</h1>
+    
+    <div class="bg-white border rounded p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Current User Info</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <div><strong>Name:</strong> {{ debug_info.current_user }}</div>
+            <div><strong>User ID:</strong> {{ debug_info.user_id }}</div>
+            <div><strong>Role:</strong> {{ debug_info.user_role }}</div>
+        </div>
+    </div>
+    
+    <div class="bg-white border rounded p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Database Statistics</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <div><strong>Total Subjects:</strong> {{ debug_info.total_subjects }}</div>
+            <div><strong>Total Sessions:</strong> {{ debug_info.total_sessions }}</div>
+            <div><strong>User Sessions:</strong> {{ debug_info.user_sessions }}</div>
+            <div><strong>Completed Sessions:</strong> {{ debug_info.completed_sessions }}</div>
+        </div>
+    </div>
+    
+    <div class="bg-white border rounded p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">User's Exam Sessions</h2>
+        {% if debug_info.sessions_detail %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full border-collapse border border-gray-300">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="border border-gray-300 px-4 py-2">Session ID</th>
+                            <th class="border border-gray-300 px-4 py-2">Subject ID</th>
+                            <th class="border border-gray-300 px-4 py-2">Started At</th>
+                            <th class="border border-gray-300 px-4 py-2">Completed At</th>
+                            <th class="border border-gray-300 px-4 py-2">Total Questions</th>
+                            <th class="border border-gray-300 px-4 py-2">Correct Answers</th>
+                            <th class="border border-gray-300 px-4 py-2">Score %</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for session in debug_info.sessions_detail %}
+                        <tr>
+                            <td class="border border-gray-300 px-4 py-2">{{ session.id }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ session.subject_id }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ session.started_at }}</td>
+                            <td class="border border-gray-300 px-4 py-2">
+                                {% if session.completed_at %}
+                                    <span class="text-green-600">{{ session.completed_at }}</span>
+                                {% else %}
+                                    <span class="text-red-600">Not completed</span>
+                                {% endif %}
+                            </td>
+                            <td class="border border-gray-300 px-4 py-2">
+                                {% if session.total_questions is not none %}
+                                    {{ session.total_questions }}
+                                {% else %}
+                                    <span class="text-gray-400">NULL</span>
+                                {% endif %}
+                            </td>
+                            <td class="border border-gray-300 px-4 py-2">
+                                {% if session.correct_answers is not none %}
+                                    {{ session.correct_answers }}
+                                {% else %}
+                                    <span class="text-gray-400">NULL</span>
+                                {% endif %}
+                            </td>
+                            <td class="border border-gray-300 px-4 py-2">
+                                {% if session.score_percentage is not none %}
+                                    {{ session.score_percentage }}%
+                                {% else %}
+                                    <span class="text-gray-400">NULL</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-500">No sessions found for this user.</p>
+        {% endif %}
+    </div>
+    
+    <div class="bg-white border rounded p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Report Card Logic Results</h2>
+        <div class="mb-4">
+            <strong>Report Rows Found:</strong> {{ debug_info.report_rows_count }}
+        </div>
+        {% if debug_info.report_rows %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full border-collapse border border-gray-300">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="border border-gray-300 px-4 py-2">Subject Name</th>
+                            <th class="border border-gray-300 px-4 py-2">Session ID</th>
+                            <th class="border border-gray-300 px-4 py-2">Completed At</th>
+                            <th class="border border-gray-300 px-4 py-2">Has Scores</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in debug_info.report_rows %}
+                        <tr>
+                            <td class="border border-gray-300 px-4 py-2">{{ row.subject_name }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ row.session_id }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ row.completed_at }}</td>
+                            <td class="border border-gray-300 px-4 py-2">
+                                {% if row.has_scores %}
+                                    <span class="text-green-600">✓ Yes</span>
+                                {% else %}
+                                    <span class="text-red-600">✗ No</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-red-600 font-semibold">❌ No report rows found - This is why the report card shows "No completed sessions"!</p>
+        {% endif %}
+    </div>
+    
+    <div class="bg-blue-50 border border-blue-200 rounded p-4">
+        <h3 class="text-lg font-semibold text-blue-800 mb-2">Possible Issues:</h3>
+        <ul class="list-disc list-inside text-blue-700 space-y-1">
+            <li>No exam sessions exist for this user</li>
+            <li>Exam sessions exist but are not marked as completed (completed_at is NULL)</li>
+            <li>Sessions are completed but the report card logic is not finding them</li>
+            <li>Database schema issues with the new score fields</li>
+        </ul>
+    </div>
+    
+    <div class="mt-6">
+        <a href="{{ url_for('student.report_card') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Back to Report Card
+        </a>
+        <a href="{{ url_for('student.backfill_scores') }}" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 ml-2">
+            Backfill Scores (Teachers Only)
+        </a>
+    </div>
+</div>
+{% endblock %}

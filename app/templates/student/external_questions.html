@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block title %}External Questions - SS2 & SS3{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">External Questions - SS2 & SS3</h1>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            Access questions from the external API for SS2 and SS3 students. Select your class level and subject to get started.
+        </p>
+        
+        <!-- Class Level Selection -->
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Select Class Level</h2>
+            <div class="flex gap-4">
+                <button id="ss2-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    SS2 (Senior Secondary 2)
+                </button>
+                <button id="ss3-btn" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                    SS3 (Senior Secondary 3)
+                </button>
+            </div>
+        </div>
+
+        <!-- Subject Selection -->
+        <div class="mb-6" id="subject-selection" style="display: none;">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Select Subject</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                <button class="subject-btn px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" data-subject="chemistry">
+                    Chemistry
+                </button>
+                <button class="subject-btn px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" data-subject="physics">
+                    Physics
+                </button>
+                <button class="subject-btn px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" data-subject="mathematics">
+                    Mathematics
+                </button>
+                <button class="subject-btn px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" data-subject="biology">
+                    Biology
+                </button>
+                <button class="subject-btn px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" data-subject="english">
+                    English
+                </button>
+                <button class="subject-btn px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" data-subject="economics">
+                    Economics
+                </button>
+                <button class="subject-btn px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" data-subject="government">
+                    Government
+                </button>
+                <button class="subject-btn px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" data-subject="literature">
+                    Literature
+                </button>
+            </div>
+        </div>
+
+        <!-- Year Filter -->
+        <div class="mb-6" id="year-filter" style="display: none;">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Filter by Year (Optional)</h2>
+            <div class="flex gap-4 items-center">
+                <select id="year-select" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    <option value="">All Years</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                    <option value="2020">2020</option>
+                </select>
+                <button id="load-questions-btn" class="px-6 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition-colors">
+                    Load Questions
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loading-indicator" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center" style="display: none;">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-brand"></div>
+        <p class="mt-2 text-gray-600 dark:text-gray-300">Loading questions...</p>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-message" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4" style="display: none;">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Error</h3>
+                <div class="mt-2 text-sm text-red-700 dark:text-red-300" id="error-text"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Questions Display -->
+    <div id="questions-container" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6" style="display: none;">
+        <!-- Questions will be dynamically loaded here -->
+    </div>
+
+    <!-- API Test Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">API Connection Test</h2>
+        <button id="test-api-btn" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+            Test API Connection
+        </button>
+        <div id="api-test-result" class="mt-3 p-3 rounded-lg" style="display: none;"></div>
+    </div>
+</div>
+
+<!-- Include the API handler script -->
+<script src="{{ url_for('static', filename='js/api-handler.js') }}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let selectedClassLevel = null;
+    let selectedSubject = null;
+
+    // Class level selection
+    document.getElementById('ss2-btn').addEventListener('click', function() {
+        selectedClassLevel = 'ss2';
+        showSubjectSelection();
+        updateButtonStates('ss2');
+    });
+
+    document.getElementById('ss3-btn').addEventListener('click', function() {
+        selectedClassLevel = 'ss3';
+        showSubjectSelection();
+        updateButtonStates('ss3');
+    });
+
+    // Subject selection
+    document.querySelectorAll('.subject-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            selectedSubject = this.dataset.subject;
+            showYearFilter();
+            updateSubjectButtonStates(selectedSubject);
+        });
+    });
+
+    // Load questions
+    document.getElementById('load-questions-btn').addEventListener('click', function() {
+        if (selectedClassLevel && selectedSubject) {
+            loadQuestions();
+        }
+    });
+
+    // Test API connection
+    document.getElementById('test-api-btn').addEventListener('click', function() {
+        testAPIConnection();
+    });
+
+    function showSubjectSelection() {
+        document.getElementById('subject-selection').style.display = 'block';
+        document.getElementById('year-filter').style.display = 'none';
+        document.getElementById('questions-container').style.display = 'none';
+    }
+
+    function showYearFilter() {
+        document.getElementById('year-filter').style.display = 'block';
+    }
+
+    function updateButtonStates(activeClass) {
+        document.getElementById('ss2-btn').className = activeClass === 'ss2' 
+            ? 'px-6 py-3 bg-blue-700 text-white rounded-lg transition-colors'
+            : 'px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors';
+        
+        document.getElementById('ss3-btn').className = activeClass === 'ss3'
+            ? 'px-6 py-3 bg-green-700 text-white rounded-lg transition-colors'
+            : 'px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors';
+    }
+
+    function updateSubjectButtonStates(activeSubject) {
+        document.querySelectorAll('.subject-btn').forEach(btn => {
+            if (btn.dataset.subject === activeSubject) {
+                btn.className = 'subject-btn px-4 py-2 bg-brand text-white rounded-lg transition-colors';
+            } else {
+                btn.className = 'subject-btn px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors';
+            }
+        });
+    }
+
+    async function loadQuestions() {
+        const year = document.getElementById('year-select').value;
+        
+        showLoading();
+        hideError();
+        hideQuestions();
+
+        try {
+            const result = await window.questionsAPI.fetchQuestions(selectedSubject, selectedClassLevel, year);
+            
+            if (result.success) {
+                window.questionsAPI.displayQuestions('questions-container', result.data);
+                showQuestions();
+            } else {
+                showError(result.error || 'Failed to load questions');
+            }
+        } catch (error) {
+            showError('Failed to load questions: ' + error.message);
+        } finally {
+            hideLoading();
+        }
+    }
+
+    async function testAPIConnection() {
+        const resultDiv = document.getElementById('api-test-result');
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = '<p class="text-gray-600 dark:text-gray-300">Testing connection...</p>';
+
+        try {
+            const result = await window.questionsAPI.testConnection();
+            
+            if (result.success) {
+                resultDiv.className = 'mt-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800';
+                resultDiv.innerHTML = '<p class="text-green-800 dark:text-green-200">✓ API connection successful!</p>';
+            } else {
+                resultDiv.className = 'mt-3 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800';
+                resultDiv.innerHTML = '<p class="text-red-800 dark:text-red-200">✗ API connection failed: ' + (result.error || 'Unknown error') + '</p>';
+            }
+        } catch (error) {
+            resultDiv.className = 'mt-3 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800';
+            resultDiv.innerHTML = '<p class="text-red-800 dark:text-red-200">✗ API connection failed: ' + error.message + '</p>';
+        }
+    }
+
+    function showLoading() {
+        document.getElementById('loading-indicator').style.display = 'block';
+    }
+
+    function hideLoading() {
+        document.getElementById('loading-indicator').style.display = 'none';
+    }
+
+    function showError(message) {
+        document.getElementById('error-text').textContent = message;
+        document.getElementById('error-message').style.display = 'block';
+    }
+
+    function hideError() {
+        document.getElementById('error-message').style.display = 'none';
+    }
+
+    function showQuestions() {
+        document.getElementById('questions-container').style.display = 'block';
+    }
+
+    function hideQuestions() {
+        document.getElementById('questions-container').style.display = 'none';
+    }
+});
+</script>
+
+<style>
+.questions-container {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.question-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    background-color: #f9fafb;
+}
+
+.dark .question-item {
+    border-color: #374151;
+    background-color: #1f2937;
+}
+
+.question-text {
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.options-list {
+    margin-bottom: 12px;
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dark .option-item {
+    border-bottom-color: #374151;
+}
+
+.option-item:last-child {
+    border-bottom: none;
+}
+
+.option-letter {
+    font-weight: bold;
+    margin-right: 8px;
+    min-width: 20px;
+}
+
+.correct-option {
+    background-color: #dcfce7;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+.dark .correct-option {
+    background-color: #14532d;
+}
+
+.correct-indicator {
+    color: #16a34a;
+    font-weight: bold;
+    margin-left: auto;
+}
+
+.question-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.dark .question-meta {
+    color: #9ca3af;
+}
+
+.year, .exam-type {
+    background-color: #f3f4f6;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.dark .year, .dark .exam-type {
+    background-color: #374151;
+}
+</style>
+{% endblock %}

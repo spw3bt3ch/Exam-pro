@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% block title %}Full CBT Diagnostic{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6">Full CBT System Diagnostic</h1>
+    
+    <!-- Current User Info -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4 text-blue-800">Current User</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <div><strong>Name:</strong> {{ diagnostic_info.current_user.name }}</div>
+            <div><strong>ID:</strong> {{ diagnostic_info.current_user.id }}</div>
+            <div><strong>Role:</strong> {{ diagnostic_info.current_user.role }}</div>
+            <div><strong>Class:</strong> {{ diagnostic_info.current_user.class }}</div>
+        </div>
+    </div>
+    
+    <!-- Database Statistics -->
+    <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4 text-green-800">Database Statistics</h2>
+        <div class="grid grid-cols-3 gap-4">
+            <div><strong>Total Users:</strong> {{ diagnostic_info.database_stats.total_users }}</div>
+            <div><strong>Total Subjects:</strong> {{ diagnostic_info.database_stats.total_subjects }}</div>
+            <div><strong>Total Questions:</strong> {{ diagnostic_info.database_stats.total_questions }}</div>
+            <div><strong>Total Sessions:</strong> {{ diagnostic_info.database_stats.total_sessions }}</div>
+            <div><strong>Total Responses:</strong> {{ diagnostic_info.database_stats.total_responses }}</div>
+            <div><strong>Completed Sessions:</strong> {{ diagnostic_info.database_stats.completed_sessions }}</div>
+        </div>
+    </div>
+    
+    <!-- User Sessions -->
+    <div class="bg-white border rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Your Exam Sessions</h2>
+        {% if diagnostic_info.user_sessions %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full border-collapse border border-gray-300">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="border border-gray-300 px-4 py-2">Session ID</th>
+                            <th class="border border-gray-300 px-4 py-2">Subject</th>
+                            <th class="border border-gray-300 px-4 py-2">Started</th>
+                            <th class="border border-gray-300 px-4 py-2">Completed</th>
+                            <th class="border border-gray-300 px-4 py-2">Scores</th>
+                            <th class="border border-gray-300 px-4 py-2">Has Scores</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for session in diagnostic_info.user_sessions %}
+                        <tr class="{% if session.is_completed %}bg-green-50{% else %}bg-yellow-50{% endif %}">
+                            <td class="border border-gray-300 px-4 py-2">{{ session.id }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ session.subject_name }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ session.started_at }}</td>
+                            <td class="border border-gray-300 px-4 py-2">
+                                {% if session.is_completed %}
+                                    <span class="text-green-600">{{ session.completed_at }}</span>
+                                {% else %}
+                                    <span class="text-yellow-600">Not completed</span>
+                                {% endif %}
+                            </td>
+                            <td class="border border-gray-300 px-4 py-2">
+                                {{ session.total_questions or 'N/A' }}/{{ session.correct_answers or 'N/A' }}/{{ session.score_percentage or 'N/A' }}%
+                            </td>
+                            <td class="border border-gray-300 px-4 py-2">
+                                {% if session.has_scores %}
+                                    <span class="text-green-600">✓ Yes</span>
+                                {% else %}
+                                    <span class="text-red-600">✗ No</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-red-600 font-semibold">❌ No exam sessions found for this user!</p>
+        {% endif %}
+    </div>
+    
+    <!-- User Responses -->
+    <div class="bg-white border rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Your Exam Responses</h2>
+        {% if diagnostic_info.user_responses %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full border-collapse border border-gray-300">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="border border-gray-300 px-4 py-2">Session ID</th>
+                            <th class="border border-gray-300 px-4 py-2">Question</th>
+                            <th class="border border-gray-300 px-4 py-2">Selected Answer</th>
+                            <th class="border border-gray-300 px-4 py-2">Correct Answer</th>
+                            <th class="border border-gray-300 px-4 py-2">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for response in diagnostic_info.user_responses %}
+                        <tr class="{% if response.is_correct %}bg-green-50{% else %}bg-red-50{% endif %}">
+                            <td class="border border-gray-300 px-4 py-2">{{ response.session_id }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ response.question_text[:50] }}...</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ response.selected_option_text }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ response.correct_option_text }}</td>
+                            <td class="border border-gray-300 px-4 py-2">
+                                {% if response.is_correct %}
+                                    <span class="text-green-600">✓ Correct</span>
+                                {% else %}
+                                    <span class="text-red-600">✗ Wrong</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-red-600 font-semibold">❌ No exam responses found!</p>
+        {% endif %}
+    </div>
+    
+    <!-- Subjects with Questions -->
+    <div class="bg-white border rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Subjects and Questions</h2>
+        {% for subject in diagnostic_info.subjects_with_questions %}
+            <div class="mb-4 p-4 border rounded">
+                <h3 class="font-semibold text-lg">{{ subject.name }} ({{ subject.questions_count }} questions)</h3>
+                {% if subject.questions %}
+                    <div class="ml-4">
+                        {% for question in subject.questions %}
+                            <div class="mb-2 p-2 bg-gray-50 rounded">
+                                <div class="font-medium">Q{{ question.id }}: {{ question.text[:100] }}{% if question.text|length > 100 %}...{% endif %}</div>
+                                <div class="text-sm text-gray-600">
+                                    Options: {{ question.options_count }}, Correct: {{ question.correct_options_count }}
+                                    {% if question.correct_options_count == 0 %}
+                                        <span class="text-red-600">⚠️ No correct answer set!</span>
+                                    {% elif question.correct_options_count > 1 %}
+                                        <span class="text-yellow-600">⚠️ Multiple correct answers!</span>
+                                    {% else %}
+                                        <span class="text-green-600">✓ OK</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-red-600">❌ No questions found for this subject!</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Report Card Data -->
+    <div class="bg-white border rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Report Card Data</h2>
+        {% if diagnostic_info.report_card_data %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full border-collapse border border-gray-300">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="border border-gray-300 px-4 py-2">Subject</th>
+                            <th class="border border-gray-300 px-4 py-2">Session ID</th>
+                            <th class="border border-gray-300 px-4 py-2">Completed</th>
+                            <th class="border border-gray-300 px-4 py-2">Total</th>
+                            <th class="border border-gray-300 px-4 py-2">Correct</th>
+                            <th class="border border-gray-300 px-4 py-2">Percentage</th>
+                            <th class="border border-gray-300 px-4 py-2">Grade</th>
+                            <th class="border border-gray-300 px-4 py-2">Stored Scores</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in diagnostic_info.report_card_data %}
+                        <tr>
+                            <td class="border border-gray-300 px-4 py-2">{{ row.subject_name }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ row.session_id }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ row.completed_at }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ row.total }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ row.correct }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ '%.1f' % row.percentage }}%</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ row.grade }}</td>
+                            <td class="border border-gray-300 px-4 py-2">
+                                {% if row.has_stored_scores %}
+                                    <span class="text-green-600">✓ Yes</span>
+                                {% else %}
+                                    <span class="text-red-600">✗ No</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-red-600 font-semibold">❌ No report card data found! This is why the report card is empty.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="flex space-x-4">
+        <a href="{{ url_for('student.report_card') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Back to Report Card
+        </a>
+        <a href="{{ url_for('student.backfill_scores') }}" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+            Backfill Scores
+        </a>
+        <a href="{{ url_for('student.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+            Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}
